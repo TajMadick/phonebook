@@ -96,6 +96,15 @@ app.post('/api/persons', (request, response) => {
   response.json(newPerson);
 })
 
+app.put('/api/persons/:id', (request, response) => {
+  const id = request.params.id;
+  const existingPerson = persons.find(person => person.id === id);
+
+  existingPerson.number = request.body.number ?? existingPerson.number;
+
+  response.json(existingPerson);
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
