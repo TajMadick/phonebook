@@ -57,41 +57,23 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body;
-
-  if (!body.name && !body.number){
-    return response.status(404).json({ error: 'Name and number is missing' })
-  }
-  else if (!body.name){
-    return response.status(404).json({ error: 'Name is missing' })
-  }
-  else if (!body.number){
-    return response.status(404).json({ error: 'Number is missing' })
-  }
 
   const newPerson = new Person({
     name: body.name,
     number: body.number
   })
 
-  newPerson.save().then(savedPerson => {
-    response.json(savedPerson);
-  })
+  newPerson.save()
+    .then(savedPerson => {
+      response.json(savedPerson);
+    })
+    .catch(error => next(error))
 })
 
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
-
-  if (!name && !number){
-    return response.status(404).json({ error: 'Name and number is missing' })
-  }
-  else if (!name){
-    return response.status(404).json({ error: 'Name is missing' })
-  }
-  else if (!number){
-    return response.status(404).json({ error: 'Number is missing' })
-  }
 
   Person.findById(request.params.id)
     .then(person => {
@@ -101,9 +83,11 @@ app.put('/api/persons/:id', (request, response) => {
       person.name = name
       person.number = number
 
-      return person.save().then(updatedPerson => {
-        response.json(updatedPerson)
-      })
+      return person.save()
+        .then(updatedPerson => {
+          response.json(updatedPerson)
+        })
+       .catch(error => next(error))     
     })
     .catch(error => next(error))
 })
@@ -114,7 +98,9 @@ const errorHandler = (error, request, response, next) => {
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   }
-
+  else if (error.name === 'ValidationError'){
+    return response.status(400).send({ error: error.message })
+  }
   next(error)
 }
 
