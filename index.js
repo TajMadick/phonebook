@@ -96,7 +96,7 @@ app.put('/api/persons/:id', (request, response) => {
   Person.findById(request.params.id)
     .then(person => {
       if (!person) {
-        return response.status(404).end()
+        return response.status(404).json({ error: 'Please refresh page' })
       }
       person.name = name
       person.number = number
